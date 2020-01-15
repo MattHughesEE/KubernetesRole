@@ -1,0 +1,17 @@
+---
+- name: Install pod network driver (generic)
+  become: true
+  become_user: kube
+  shell: kubectl apply -f {{ k8s_pod_network_driver_config }} >> /home/kube/pod_network_setup.txt
+  args:
+    creates: /home/kube/pod_network_setup.txt
+  when: not k8s_aws_cni_enabled
+
+- name: Install pod network driver (AWS-VPC-CNI)
+  become: true
+  become_user: kube
+  shell: kubectl apply -f {{ item }} >> /home/kube/pod_network_setup.txt
+  with_items: "{{ k8s_aws_cni_driver_yamls }}"
+  args:
+    creates: /home/kube/pod_network_setup.txt
+  when: k8s_aws_cni_enabled
